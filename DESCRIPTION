@@ -2,15 +2,15 @@ Package: virtualclade
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Dan",
+           family = "Warren",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
+           email = "dan.l.warren@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Description: This package simulates the evolution of a clade of virtualspecies objects.  It's intended for testing ENM/SDM methods where evolution is a component.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports: virtualspecies, dismo, raster, geiger, ggplot2
