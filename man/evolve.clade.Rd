@@ -16,7 +16,7 @@ evolve.clade(
 )
 }
 \arguments{
-\item{root.species}{A virtualspecies object to be used as the common ancestor of all simulated species.}
+\item{root.species}{A virtualspecies object to be used as the common ancestor of all simulated species.  Note that this currently has to be one that was generated with approach = "response".}
 
 \item{ntaxa}{Number of tip taxa desired.}
 

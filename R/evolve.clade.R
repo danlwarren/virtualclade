@@ -1,6 +1,6 @@
 #' Evolves a clade of virtual species from a single virtualspecies object.
 #'
-#' @param root.species A virtualspecies object to be used as the common ancestor of all simulated species.
+#' @param root.species A virtualspecies object to be used as the common ancestor of all simulated species.  Note that this currently has to be one that was generated with approach = "response".
 #' @param ntaxa Number of tip taxa desired.
 #' @param env A stack of environmental rasters.
 #' @param rate The Brownian rate parameter controlling the rate of niche evolution.  Since different niche axes will have different parameter values, this rate is expressed as as a proportion of the value of each parameter at the root node. So if rate = 0.5 and the value of a parameter for the root species is 4, the sigma parameter for ape's rTraitCont simulation will be 0.5 * 4 = 2.
@@ -17,6 +17,10 @@
 
 
 evolve.clade <- function(root.species, ntaxa, env, rate = 0.2, min.sd = .5, tip.prefix = "species", max.tries = 10, ...){
+
+   if("pca" %in% names(root.species$details)){
+      stop("evolve.clade only works with virtual species generated using approach = 'response'")
+   }
 
    # Grabbing the params from our root species to evolve them
    root.species <- unpack.species(root.species)
@@ -108,7 +112,15 @@ evolve.clade <- function(root.species, ntaxa, env, rate = 0.2, min.sd = .5, tip.
                          tree = tree,
                          root.species = root.species,
                          sim.args = as.list(match.call()))
+
+   class(output) <- c("list", "vc.clade")
+
+   return(output)
 }
+
+
+
+
 
 
 

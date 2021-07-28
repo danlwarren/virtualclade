@@ -60,4 +60,3 @@ vc.species <- function(virtualspecies = NA, actual.range = NA, presence.points =
 
    return(output)
 }
-

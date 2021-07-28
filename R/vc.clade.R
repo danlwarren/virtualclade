@@ -56,3 +56,6 @@ vc.clade <- function(species = NA, tree = NA, root.species = NA, sim.args = NA){
    return(output)
 }
 
+plot.vc.clade <- function(this.clade){
+   lapply
+}

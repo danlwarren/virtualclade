@@ -3,6 +3,7 @@
 #'
 #' @param species A virtualspecies object
 #'
+#'
 #' @return A virtualspecies object with its guts unpacked slightly
 
 unpack.species <- function (species){
