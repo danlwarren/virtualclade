@@ -39,7 +39,7 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
       env.cols <- names(env)[names(env) %in% split.cols]
       if(length(env.cols) > 0){
          pa.table <- cbind(pa.table,
-                           extract(env[[env.cols]], pa.table[,1:2]))
+                           raster::extract(env[[env.cols]], pa.table[,1:2]))
       }
    }
 
@@ -48,28 +48,26 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    centroids <- plyr::ddply(pa.table[,c(species.var, split.cols)], species.var, plyr::numcolwise(mean))
 
    # Get kmeans clusters
-   unique.rows <- unique(pa.table[,split.cols])
-   clusters <- kmeans(unique.rows, length(unique(pa.table[,species.var])), nstart=1, iter.max=1000)
-   unique.clusters <- cbind(unique(unique.rows[c("lon", "lat")]), paste("cluster", clusters$cluster, sep="."))
-   colnames(unique.clusters) <- c("lon", "lat", "cluster")
+   unique.rows <- distinct(pa.table, across(all_of(split.cols)), .keep_all = TRUE)
+   clusters <- kmeans(unique.rows[,split.cols], length(unique(pa.table[,species.var])), nstart=1, iter.max=1000)
+   unique.clusters <- cbind(unique.rows, clusters$cluster)
+   colnames(unique.clusters)[ncol(unique.clusters)] <- "cluster"
 
    # This is just for a quick prototype, might want to make it more general eventually
-   cluster.latlon <- cbind(unique(unique.rows[c("lon", "lat")]), clusters$cluster)
-   colnames(cluster.latlon) <- c("lon", "lat", "cluster")
-   cluster.raster <- rasterize(cluster.latlon[,c("lon", "lat")], raster.template, field=cluster.latlon[,"cluster"])
+   cluster.raster <- rasterize(unique.clusters[,c("lon", "lat")], raster.template, field=unique.clusters[,"cluster"])
    raster::plot(cluster.raster)
 
-
    # Making a unique raster for each cluster, putting them in a stack
-   for(i in unique(cluster.latlon[,"cluster"])){
+   for(i in unique(unique.clusters[,"cluster"])){
       cluster.stack <- addLayer(cluster.stack, cluster.raster == i)
    }
    cluster.stack <- dropLayer(cluster.stack, 1)
-   names(cluster.stack) <- unique(cluster.latlon[,"cluster"])
+   names(cluster.stack) <- paste("species", unique(unique.clusters[,"cluster"]), sep = ".")
 
    # Making a raster of suitable habitat for each species, putting it in a stack
    for(i in unique(pa.table[,species.var])){
-      suit.stack <- addLayer(suit.stack, rasterize(pa.table[pa.table[species.var] == i,c("lon", "lat")], suit.stack), field=1)
+      suit.stack <- addLayer(suit.stack,
+                             rasterize(pa.table[pa.table[species.var] == i,c("lon", "lat")], suit.stack, field = 1))
    }
    suit.stack <- dropLayer(suit.stack, 1)
    names(suit.stack) <- unique(pa.table[,species.var])
@@ -110,18 +108,18 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    # Here's where we're generating sympatry.  In the original sim I had this set up
    # to produce a 1 everywhere that was present in the PA raster, the true suitability
    # in any grid cell that was within the buffer but NOT present in the PA raster,
-   # and zero everywhere else.  I can't recall why I did it that way though.
+   # and zero everywhere else.  I can't recall why I did it that way though. I think
+   # for simulation purposes it might be better to have the suitability at every grid cell
+   # in the range and 0 elsewhere
 
    for(i in names(breadth)){
       temp.pa <- pa.stack[[i]]
       temp.pa[temp.pa < 1 ] <- NA
       buffered.suitability <- raster::buffer(temp.pa, buffer.width) *
          x$species[[i]]$virtualspecies$suitab.raster
-      temp.pa[is.na(temp.pa)] <- 0
       buffered.suitability[is.na(buffered.suitability)] <- 0
       this.range <- raster.template +
-         buffered.suitability +
-         temp.pa
+         buffered.suitability
       this.range[this.range > 1] <- 1
 
       sample.stack[[i]] <- this.range
