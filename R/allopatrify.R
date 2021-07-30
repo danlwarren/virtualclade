@@ -48,7 +48,7 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    centroids <- plyr::ddply(pa.table[,c(species.var, split.cols)], species.var, plyr::numcolwise(mean))
 
    # Get kmeans clusters
-   unique.rows <- distinct(pa.table, across(all_of(split.cols)), .keep_all = TRUE)
+   unique.rows <- dplyr::distinct(pa.table, across(all_of(split.cols)), .keep_all = TRUE)
    clusters <- kmeans(unique.rows[,split.cols], length(unique(pa.table[,species.var])), nstart=1, iter.max=1000)
    unique.clusters <- cbind(unique.rows, clusters$cluster)
    colnames(unique.clusters)[ncol(unique.clusters)] <- "cluster"
