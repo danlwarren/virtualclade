@@ -69,7 +69,7 @@ response.plots <- function(clade){
 
   response.plot <- qplot(value, suitability, data = plot.df,
                          color = species, geom = "line") +
-    facet_grid(~variable, scales = "free")
+    facet_grid(~variable, scales = "free") + theme_bw()
 
   output <- list(response.plot = response.plot,
                  plot.df = plot.df)
