@@ -2,7 +2,6 @@
 
 export(clade.pa)
 export(evolve.clade)
+export(response.plots)
 export(vc.clade)
 export(vc.species)
-export(allopatrify)
-
