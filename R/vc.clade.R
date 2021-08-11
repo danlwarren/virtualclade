@@ -57,5 +57,19 @@ vc.clade <- function(species = NA, tree = NA, root.species = NA, sim.args = NA){
 }
 
 plot.vc.clade <- function(this.clade){
-   lapply
+   suit.rasters <- stack(lapply(this.clade$species,
+                                        function(x) x$virtualspecies$suitab.raster))
+   print(response.plots(this.clade)$response.plot)
+   plot(suit.rasters)
+}
+
+summary.vc.clade <- function(this.clade){
+   ape::plot.phylo(this.clade$tree)
+   print(response.plots(this.clade)$response.plot)
+   plot(this.clade)
+   cat(paste("A vc.clade object with", length(this.clade$species), "species"))
+}
+
+print.vc.clade <- function(this.clade){
+   summary(this.clade)
 }
