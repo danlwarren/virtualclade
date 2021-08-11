@@ -1,16 +1,16 @@
-#'  Takes a vc.species object, a raster template, and a buffer width.  Breaks combined range apart into N clusters using kmeans clustering, and then assigns each cluster to the species whose PA centroid is closest to that cluster. Then it buffers the intersection of the cluster and the species PA out by buffer.width, and multiplies by the suitability raster.  That gives us the suitability of habitat within the actual range of the species.  Everything is then stuffed into a vc.clade object.
+#' Takes a vc.species object, a raster template, and a buffer width.  Breaks combined range apart into N clusters using kmeans clustering, and then assigns each cluster to the species whose PA centroid is closest to that cluster. Then it buffers the intersection of the cluster and the species PA out by buffer.width, and multiplies by the suitability raster.  That gives us the suitability of habitat within the actual range of the species.  Everything is then stuffed into a vc.clade object.
 #'
-#'  @param x A vc.clade object to allopatrify
-#'  @param buffer.width Controls the post-allpatrification expansion of species' ranges.  Higher numbers create more range overlap.
-#'  @param plot Controls whether to print plots when generating PA data
-#'  @param split.cols Vector of column names to use for partitioning species occurrences.
-#'  @param beta Beta parameter past to convertToPA from virtual species
-#'  @param alpha Alpha parameter past to convertToPA from virtual species
-#'  @param env Optional stack of environmental layers, which will eventually be used to partition species based on environment as well as geography.
+#' @param x A vc.clade object to allopatrify
+#' @param buffer.width Controls the post-allpatrification expansion of species' ranges.  Higher numbers create more range overlap.
+#' @param plot Controls whether to print plots when generating PA data
+#' @param split.cols Vector of column names to use for partitioning species occurrences.
+#' @param beta Beta parameter past to convertToPA from virtual species
+#' @param alpha Alpha parameter past to convertToPA from virtual species
+#' @param env Optional stack of environmental layers, which will eventually be used to partition species based on environment as well as geography.
 #'
-#'  @export allopatrify
+#' @export allopatrify
 #'
-#'  @return A vc.clade object with ranges added to the "actual range" variable for each species
+#' @return A vc.clade object with ranges added to the "actual range" variable for each species
 
 allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "lat"), beta = 0.5, alpha = -0.00007, env = NA){
 
