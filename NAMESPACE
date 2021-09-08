@@ -3,6 +3,7 @@
 export(allopatrify)
 export(clade.pa)
 export(evolve.clade)
+export(parameter.plots)
 export(response.plots)
 export(vc.clade)
 export(vc.species)

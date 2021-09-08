@@ -8,6 +8,8 @@ evolve.clade(
   root.species,
   ntaxa,
   env,
+  model = "BM",
+  alpha = 0.1,
   rate = 0.2,
   min.sd = 0.5,
   tip.prefix = "species",
@@ -21,6 +23,10 @@ evolve.clade(
 \item{ntaxa}{Number of tip taxa desired.}
 
 \item{env}{A stack of environmental rasters.}
+
+\item{model}{"BM" for Brownian motion, "OU" for Ornstein-Uhlenbeck}
+
+\item{alpha}{The alpha parameter for model = "OH", setting the strength of selective constraint.  Theta (the optimum for each parameter) is assumed to be the value at the root.}
 
 \item{rate}{The Brownian rate parameter controlling the rate of niche evolution.  Since different niche axes will have different parameter values, this rate is expressed as as a proportion of the value of each parameter at the root node. So if rate = 0.5 and the value of a parameter for the root species is 4, the sigma parameter for ape's rTraitCont simulation will be 0.5 * 4 = 2.}
 
