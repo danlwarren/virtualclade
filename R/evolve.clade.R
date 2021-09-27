@@ -60,8 +60,7 @@ evolve.clade <- function(root.species, ntaxa, env, model = "BM", alpha = 0.1, ra
         # apparently I do
 
         # Setting sigma to a low value if the root value is zero
-        this.sigma <- max(.000001, rate * as.numeric(this.root.value,
-                                        root.value = this.root.value))
+        this.sigma <- max(.000001, rate * abs(as.numeric(this.root.value)))
 
         if(model == "BM"){
           this.trait <- ape::rTraitCont(tree,
