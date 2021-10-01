@@ -11,7 +11,8 @@ allopatrify(
   split.cols = c("lon", "lat"),
   beta = 0.5,
   alpha = -7e-05,
-  env = NA
+  env = NA,
+  npres = 500
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ allopatrify(
 \item{alpha}{Alpha parameter past to convertToPA from virtual species}
 
 \item{env}{Optional stack of environmental layers, which will eventually be used to partition species based on environment as well as geography.}
+
+\item{npres}{Number of presence points per species to use for partitioning ranges.}
 }
 \value{
 A vc.clade object with ranges added to the "actual range" variable for each species

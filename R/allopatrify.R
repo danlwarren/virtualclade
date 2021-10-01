@@ -7,19 +7,23 @@
 #' @param beta Beta parameter past to convertToPA from virtual species
 #' @param alpha Alpha parameter past to convertToPA from virtual species
 #' @param env Optional stack of environmental layers, which will eventually be used to partition species based on environment as well as geography.
+#' @param npres Number of presence points per species to use for partitioning ranges.
 #'
 #' @export allopatrify
 #'
 #' @return A vc.clade object with ranges added to the "actual range" variable for each species
 
-allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "lat"), beta = 0.5, alpha = -0.00007, env = NA){
+allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "lat"),
+                        beta = 0.5, alpha = -0.00007, env = NA, npres = 500){
 
    # Get the species name template from the clade object
    species.var <- gsub(".1", "", names(x$species)[1])
 
    print("Getting pa data...")
 
-   pa <-  clade.pa(x, sample.source = "suitab.raster", method = "probability", beta = beta, alpha = alpha, plot = plot)
+   pa <-  clade.pa(x, sample.source = "suitab.raster",
+                   method = "probability",
+                   beta = beta, alpha = alpha, plot = plot, npres = npres)
 
    # Start building the output df
    pa.table <-  data.frame(pa$pa.table)
