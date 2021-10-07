@@ -12,7 +12,9 @@ allopatrify(
   beta = 0.5,
   alpha = -7e-05,
   env = NA,
-  npres = 500
+  npres = NA,
+  min.suitable = 10,
+  nreps = 1000
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ allopatrify(
 \item{env}{Optional stack of environmental layers, which will eventually be used to partition species based on environment as well as geography.}
 
 \item{npres}{Number of presence points per species to use for partitioning ranges.}
+
+\item{min.suitable}{Minimum number of "suitable" grid cells in a species range}
+
+\item{nreps}{Number of replicates to try for permuting ranges to match phylogeny}
 }
 \value{
 A vc.clade object with ranges added to the "actual range" variable for each species
