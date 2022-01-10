@@ -1,7 +1,7 @@
 #' Takes a vc.species object, a raster template, and a buffer width.  Breaks combined range apart into N clusters using kmeans clustering, and then assigns each cluster to the species whose PA centroid is closest to that cluster. Then it buffers the intersection of the cluster and the species PA out by buffer.width, and multiplies by the suitability raster.  That gives us the suitability of habitat within the actual range of the species.  Everything is then stuffed into a vc.clade object.
 #'
 #' @param x A vc.clade object to allopatrify
-#' @param buffer.width Controls the post-allpatrification expansion of species' ranges.  Higher numbers create more range overlap.
+#' @param buffer.width Controls the post-allpatrification expansion of species' ranges.  Higher numbers create more range overlap, units are decimal degrees.
 #' @param plot Controls whether to print plots when generating PA data
 #' @param split.cols Vector of column names to use for partitioning species occurrences.
 #' @param beta Beta parameter past to convertToPA from virtual species
@@ -26,7 +26,7 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
 
    pa <-  clade.pa(x, sample.source = "suitab.raster",
                    method = "probability", beta = beta,
-                   alpha = alpha, plot = plot, npres = npres)
+                   alpha = alpha, plot = FALSE)
 
    # Start building the output df
    pa.table <-  data.frame(pa$pa.table)
@@ -35,12 +35,13 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    raster.template <- x$species[[1]]$virtualspecies$suitab.raster
    raster.template[!is.na(raster.template)] <- 0
    cluster.stack <- stack(raster.template)
-   suit.stack <- stack(raster.template)
-   pa.stack <- stack(raster.template)
+   # suit.stack <- stack(raster.template)
+   # pa.stack <- stack(raster.template)
    sample.stack <- stack(raster.template)
 
    # Get count of presence cells for each species, sorting smallest to largest
-   breadth <- sort(table(pa.table[species.var]))
+   # I don't think we're currently using this for anything
+   # breadth <- pa$breadth.table[order(pa$breadth.table$suit.cells),]
 
    if(inherits(env, c("raster", "RasterBrick", "RasterStack"))){
       env.cols <- names(env)[names(env) %in% split.cols]
@@ -70,6 +71,8 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    centroid.dist <- as.matrix(dist(centroids[,2:3], diag = TRUE, upper = TRUE))
    phylo.dist <- cophenetic(x$tree)
 
+   # This data frame contains counts of how many cells are
+   # suitable in each cluster for each species
    suitable.cells <- pa.table %>%
       group_by(species, cluster) %>%
       summarise(n = n()) %>%
@@ -123,29 +126,12 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    cluster.assignments <- data.frame(species = rownames(phylo.dist),
                                      cluster = as.numeric(rownames(best.perm)))
 
-
-
-
-   ###### THIS IS WHERE I STOPPED FOR A BIT!!!
-
    # Making a unique raster for each cluster, putting them in a stack
    for(i in cluster.assignments$cluster){
       cluster.stack <- addLayer(cluster.stack, cluster.raster == i)
    }
    cluster.stack <- dropLayer(cluster.stack, 1)
    names(cluster.stack) <- cluster.assignments$species
-
-   # Making a raster of suitable habitat for each species, putting it in a stack
-   for(i in cluster.assignments$species){
-      suit.stack <- addLayer(suit.stack,
-                             rasterize(pa.table[pa.table[species.var] == i,c("lon", "lat")], suit.stack, field = 1))
-   }
-   suit.stack <- dropLayer(suit.stack, 1)
-   names(suit.stack) <- cluster.assignments$species
-
-   if(plot == TRUE){
-      raster::plot(pa.stack)
-   }
 
    message("\n\nsympatrifying...")
 
@@ -156,17 +142,23 @@ allopatrify <- function(x, buffer.width = 1, plot=TRUE, split.cols = c("lon", "l
    # for simulation purposes it might be better to have the suitability at every grid cell
    # in the range and 0 elsewhere
 
-   for(i in cluster.assignments$species){
-      temp.pa <- cluster.stack[[i]]
-      temp.pa[temp.pa < 1 ] <- NA
-      buffered.suitability <- raster::buffer(temp.pa, buffer.width) *
-         x$species[[i]]$virtualspecies$suitab.raster
-      buffered.suitability[is.na(buffered.suitability)] <- 0
-      this.range <- raster.template +
-         buffered.suitability
-      this.range[this.range > 1] <- 1
+   pb <- progress::progress_bar$new(total = length(cluster.assignments$species))
 
-      sample.stack[[i]] <- this.range
+   for(i in cluster.assignments$species){
+     temp.pa <- cluster.stack[[i]]
+     temp.pa[temp.pa < 1 ] <- NA
+     range.shp <- rasterToPolygons(temp.pa, dissolve = TRUE)
+     range.shp <- buffer(range.shp, buffer.width, dissolve = TRUE)
+     buffered.suitability <- raster::rasterize(range.shp, temp.pa) *
+       x$species[[i]]$virtualspecies$suitab.raster
+     buffered.suitability[is.na(buffered.suitability)] <- 0
+     this.range <- raster.template +
+       buffered.suitability
+     this.range[this.range > 1] <- 1
+
+     sample.stack[[i]] <- this.range
+
+     pb$tick()
    }
    sample.stack <- dropLayer(sample.stack, 1)
 

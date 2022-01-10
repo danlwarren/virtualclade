@@ -94,6 +94,7 @@ evolve.clade <- function(root.species, ntaxa, env, model = "BM", alpha = 0.1, ra
 
     species <- list()
     for(i in names(param.list)){
+      print(i)
       species[[i]] <- vc.species(virtualspecies =  suppressMessages(generateSpFromFun(raster.stack = env,
                                                                                       parameters = param.list[[i]],
                                                                                       plot = TRUE)),

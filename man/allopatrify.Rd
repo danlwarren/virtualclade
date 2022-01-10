@@ -20,7 +20,7 @@ allopatrify(
 \arguments{
 \item{x}{A vc.clade object to allopatrify}
 
-\item{buffer.width}{Controls the post-allpatrification expansion of species' ranges.  Higher numbers create more range overlap.}
+\item{buffer.width}{Controls the post-allpatrification expansion of species' ranges.  Higher numbers create more range overlap, units are decimal degrees.}
 
 \item{plot}{Controls whether to print plots when generating PA data}
 

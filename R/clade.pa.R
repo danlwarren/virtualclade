@@ -18,6 +18,8 @@ clade.pa <- function(x, sample.source = "suitab.raster", bias.raster = NA,
 
    pa.table <- data.frame("x" = numeric(0), "y" = numeric(0), "species" = character(0))
 
+   breadth.table <- data.frame(character(0), numeric(0))
+
    if(is.na(bias.raster)){
       bias.raster <- x$species[[1]]$virtualspecies$suitab.raster
       bias.raster[!is.na(bias.raster)] <- 1
@@ -81,6 +83,8 @@ clade.pa <- function(x, sample.source = "suitab.raster", bias.raster = NA,
       this.pa <- data.frame(rasterToPoints(pa$pa.raster))
       this.pres <- this.pa[this.pa[,3] == 1,1:2]
 
+      breadth.table <- rbind(breadth.table, c(i$species.name, nrow(this.pres)))
+
       prob <- raster::extract(sample.raster, this.pres)
 
       this.pres <- this.pres[sample(1:nrow(this.pres), prob = prob, size=min(this.npres, nrow(this.pres))),]
@@ -107,11 +111,14 @@ clade.pa <- function(x, sample.source = "suitab.raster", bias.raster = NA,
    }
 
    colnames(pa.table) <- c("lon", "lat", "species")
+   colnames(breadth.table) <- c("species", "suit.cells")
 
    output.stack <- dropLayer(output.stack, 1)
 
    output <- list(pa.rasters = output.stack,
-                  pa.table = pa.table, clade = clade)
+                  pa.table = pa.table,
+                  clade = clade,
+                  breadth.table = breadth.table)
 
    return(output)
 }
